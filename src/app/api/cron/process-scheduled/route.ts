@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminSupabase } from '@/lib/supabase/server'
 
 // Este endpoint es llamado por Vercel Cron cada 5 minutos
 // Busca campañas con status='scheduled' cuyo scheduled_at ya pasó y las lanza
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
-  const supabase = createAdminClient()
+  const supabase = createAdminSupabase()
   const now = new Date().toISOString()
 
   // Buscar campañas programadas listas para lanzar
