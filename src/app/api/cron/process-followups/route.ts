@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminSupabase } from '@/lib/supabase/server'
 import nodemailer from 'nodemailer'
 
 // Cron job: reenviar emails a targets que no abrieron después de N días
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
-  const supabase = createAdminClient()
+  const supabase = createAdminSupabase()
   const now = new Date()
 
   // Buscar campañas con followup habilitado que están running o completed
