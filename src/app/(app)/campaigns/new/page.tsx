@@ -22,6 +22,13 @@ export default function NewCampaignPage() {
     landing_page_id: '',
     batch_size: 50,
     batch_delay_minutes: 5,
+    // Programación
+    send_mode: 'now' as 'now' | 'scheduled', // 'now' = lanzar manual, 'scheduled' = automático
+    scheduled_at: '',
+    // Followup
+    followup_enabled: false,
+    followup_days: 3,
+    followup_max_times: 1,
   })
 
   useEffect(() => {
@@ -59,7 +66,11 @@ export default function NewCampaignPage() {
         landing_page_id: form.landing_page_id || null,
         batch_size: form.batch_size,
         batch_delay_minutes: form.batch_delay_minutes,
-        status: 'draft',
+        status: form.send_mode === 'scheduled' && form.scheduled_at ? 'scheduled' : 'draft',
+        scheduled_at: form.send_mode === 'scheduled' && form.scheduled_at ? form.scheduled_at : null,
+        followup_enabled: form.followup_enabled,
+        followup_days: form.followup_days,
+        followup_max_times: form.followup_max_times,
       })
       .select()
       .single()
@@ -226,6 +237,93 @@ export default function NewCampaignPage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Programación */}
+        <div className="card p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-gray-700">Programación</h3>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="send_mode"
+                value="now"
+                checked={form.send_mode === 'now'}
+                onChange={() => setForm({ ...form, send_mode: 'now' })}
+              />
+              <span className="text-sm text-gray-700">Lanzar manualmente</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="send_mode"
+                value="scheduled"
+                checked={form.send_mode === 'scheduled'}
+                onChange={() => setForm({ ...form, send_mode: 'scheduled' })}
+              />
+              <span className="text-sm text-gray-700">Programar fecha y hora</span>
+            </label>
+          </div>
+          {form.send_mode === 'scheduled' && (
+            <div>
+              <label className="label">Fecha y hora de inicio</label>
+              <input
+                type="datetime-local"
+                className="input"
+                required={form.send_mode === 'scheduled'}
+                value={form.scheduled_at}
+                onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })}
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                El sistema enviará los emails automáticamente en la fecha y hora indicada
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Followup automático */}
+        <div className="card p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-gray-700">Reenvío automático</h3>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              className="rounded"
+              checked={form.followup_enabled}
+              onChange={(e) => setForm({ ...form, followup_enabled: e.target.checked })}
+            />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Reenviar a quienes no abrieron el email</span>
+              <p className="text-xs text-gray-400">El sistema reenvía automáticamente una vez por día a los destinatarios que no abrieron el email</p>
+            </div>
+          </label>
+          {form.followup_enabled && (
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <div>
+                <label className="label">Reenviar después de (días)</label>
+                <input
+                  type="number"
+                  className="input"
+                  min={1}
+                  max={30}
+                  value={form.followup_days}
+                  onChange={(e) => setForm({ ...form, followup_days: Number(e.target.value) })}
+                />
+                <p className="text-xs text-gray-400 mt-1">Si no abrió el email en este plazo, se reenvía</p>
+              </div>
+              <div>
+                <label className="label">Máximo de reenvíos</label>
+                <input
+                  type="number"
+                  className="input"
+                  min={1}
+                  max={5}
+                  value={form.followup_max_times}
+                  onChange={(e) => setForm({ ...form, followup_max_times: Number(e.target.value) })}
+                />
+                <p className="text-xs text-gray-400 mt-1">Veces máximas que se reenvía a cada persona</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Actions */}

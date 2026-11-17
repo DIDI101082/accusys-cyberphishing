@@ -4,10 +4,12 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public routes (phishing landing pages, tracking, awareness)
+  // Allow public routes (phishing landing pages, tracking, awareness, cron jobs)
   if (
     pathname.startsWith('/phish') ||
     pathname.startsWith('/api/tracking') ||
+    pathname.startsWith('/api/cron') ||
+    pathname.startsWith('/api/ai') ||
     pathname === '/login'
   ) {
     return NextResponse.next()
