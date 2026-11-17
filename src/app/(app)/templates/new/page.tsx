@@ -4,13 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import PageHeader from '@/components/PageHeader'
+import AIGenerateModal from '@/components/AIGenerateModal'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Sparkles } from 'lucide-react'
 
 export default function NewTemplatePage() {
   const router = useRouter()
   const supabase = createClient()
   const [saving, setSaving] = useState(false)
+  const [showAIModal, setShowAIModal] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
@@ -24,6 +26,17 @@ export default function NewTemplatePage() {
 
   function updateForm(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  function handleAIResult(result: { type: string; html: string; subject?: string }) {
+    if (result.type === 'template') {
+      setForm((prev) => ({
+        ...prev,
+        body_html: result.html,
+        subject: result.subject || prev.subject,
+      }))
+    }
+    setShowAIModal(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -57,9 +70,27 @@ export default function NewTemplatePage() {
         </Link>
       </div>
 
-      <PageHeader title="Nuevo template de email" description="Creá una plantilla de correo para campañas de phishing" />
+      <div className="flex items-center justify-between mb-6">
+        <PageHeader title="Nuevo template de email" description="Creá una plantilla de correo para campañas de phishing" />
+        <button
+          type="button"
+          onClick={() => setShowAIModal(true)}
+          className="btn-primary flex items-center gap-2"
+        >
+          <Sparkles className="h-4 w-4" />
+          Generar con IA
+        </button>
+      </div>
 
-      <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
+      {showAIModal && (
+        <AIGenerateModal
+          mode="template"
+          onResult={handleAIResult}
+          onClose={() => setShowAIModal(false)}
+        />
+      )}
+
+      <form onSubmit={handleSubmit} className="max-w-3xl space-y-6 mt-0">
         {/* Info básica */}
         <div className="card p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-700">Información básica</h3>

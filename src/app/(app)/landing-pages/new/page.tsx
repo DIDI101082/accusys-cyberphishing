@@ -4,13 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import PageHeader from '@/components/PageHeader'
+import AIGenerateModal from '@/components/AIGenerateModal'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Sparkles } from 'lucide-react'
 
 export default function NewLandingPagePage() {
   const router = useRouter()
   const supabase = createClient()
   const [saving, setSaving] = useState(false)
+  const [showAIModal, setShowAIModal] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
@@ -46,6 +48,13 @@ export default function NewLandingPagePage() {
 </body>
 </html>`,
   })
+
+  function handleAIResult(result: { type: string; html: string }) {
+    if (result.type === 'landing') {
+      setForm((prev) => ({ ...prev, html_content: result.html }))
+    }
+    setShowAIModal(false)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -83,9 +92,27 @@ export default function NewLandingPagePage() {
         </Link>
       </div>
 
-      <PageHeader title="Nueva landing page" description="Creá una página de captura para campañas de phishing simulado" />
+      <div className="flex items-center justify-between mb-6">
+        <PageHeader title="Nueva landing page" description="Creá una página de captura para campañas de phishing simulado" />
+        <button
+          type="button"
+          onClick={() => setShowAIModal(true)}
+          className="btn-primary flex items-center gap-2"
+        >
+          <Sparkles className="h-4 w-4" />
+          Generar con IA
+        </button>
+      </div>
 
-      <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
+      {showAIModal && (
+        <AIGenerateModal
+          mode="landing"
+          onResult={handleAIResult}
+          onClose={() => setShowAIModal(false)}
+        />
+      )}
+
+      <form onSubmit={handleSubmit} className="max-w-3xl space-y-6 mt-0">
         {/* Info básica */}
         <div className="card p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-700">Información básica</h3>
