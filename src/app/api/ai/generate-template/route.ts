@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
-  // Verificar auth
-  const supabase = createAdminClient()
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
-
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: 'GEMINI_API_KEY no configurada' }, { status: 500 })
